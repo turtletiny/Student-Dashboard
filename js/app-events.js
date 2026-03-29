@@ -23,6 +23,25 @@ function bindEvents() {
     });
   }
 
+  if (els.backToSubjectsBtn) {
+    els.backToSubjectsBtn.addEventListener("click", () => {
+      const selectedSubject = getSelectedSubject();
+      if (selectedSubject?.selectedNoteFileId) {
+        selectedSubject.selectedNoteFileId = "";
+        saveState();
+        renderSubjects();
+        return;
+      }
+      switchPanel("subjects");
+    });
+  }
+
+  if (els.openDashboardSubjectAddBtn) {
+    els.openDashboardSubjectAddBtn.addEventListener("click", () => {
+      openAddItemDialog("subject");
+    });
+  }
+
   if (els.addItemForm) {
     els.addItemForm.addEventListener("submit", handleAddItemSubmit);
   }
@@ -31,78 +50,64 @@ function bindEvents() {
     els.cancelAddItemBtn.addEventListener("click", closeAddItemDialog);
   }
 
-  els.scheduleForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-
-    const subject = document.getElementById("scheduleSubject").value.trim();
-    const date = document.getElementById("scheduleDate").value;
-    const startTime = document.getElementById("scheduleStart").value;
-    const endTime = document.getElementById("scheduleEnd").value;
-    const focus = document.getElementById("scheduleFocus").value.trim();
-
-    if (!subject || !date || !startTime || !endTime || !focus) return;
-    if (endTime <= startTime) {
-      alert("End time must be after start time.");
-      return;
-    }
-
-    state.schedule.push({
-      id: crypto.randomUUID(),
-      subject,
-      date,
-      startTime,
-      endTime,
-      focus,
-      done: false
+  if (els.renameItemForm && els.renameItemInput) {
+    els.renameItemForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const value = els.renameItemInput.value.trim();
+      if (!value) return;
+      const action = pendingRenameAction;
+      closeRenameDialog();
+      if (typeof action === "function") {
+        action(value);
+      }
     });
+  }
 
-    state.schedule.sort((a, b) => {
-      const left = `${a.date}T${a.startTime}`;
-      const right = `${b.date}T${b.startTime}`;
-      return left.localeCompare(right);
-    });
-
-    els.scheduleForm.reset();
-    saveState();
-    renderSchedule();
-    renderCalendar();
-  });
+  if (els.cancelRenameItemBtn) {
+    els.cancelRenameItemBtn.addEventListener("click", closeRenameDialog);
+  }
 
   els.saveNotesBtn.addEventListener("click", () => {
     const subject = getSelectedSubject();
     if (!subject) return;
-    subject.notes = els.subjectNotes.value;
+    if (!Array.isArray(subject.notesFiles) || !subject.notesFiles.length) return;
+    const selectedNoteFile = subject.notesFiles.find((file) => file.id === subject.selectedNoteFileId);
+    if (!selectedNoteFile) return;
+    selectedNoteFile.content = els.subjectNotes.value;
+    subject.notes = selectedNoteFile.content;
     saveState();
     renderSubjects();
   });
 
-  els.resourceForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const subject = getSelectedSubject();
-    if (!subject) return;
-
-    const label = els.resourceLabel.value.trim();
-    const url = els.resourceLink.value.trim();
-    if (!label || !url) return;
-
-    subject.resources.unshift({
-      id: crypto.randomUUID(),
-      label,
-      url
+  if (els.openNoteFileAddBtn) {
+    els.openNoteFileAddBtn.addEventListener("click", () => {
+      if (!getSelectedSubject()) return;
+      openAddItemDialog("note-file");
     });
+  }
 
-    els.resourceForm.reset();
-    saveState();
-    renderSubjects();
-  });
+  if (els.openResourceAddBtn) {
+    els.openResourceAddBtn.addEventListener("click", () => {
+      if (!getSelectedSubject()) return;
+      openAddItemDialog("resource");
+    });
+  }
 
-  els.newSubjectQuickBtn.addEventListener("click", () => {
-    switchPanel("subjects");
-    openAddItemDialog("subject");
-  });
+  if (els.openAssignmentAddBtn) {
+    els.openAssignmentAddBtn.addEventListener("click", () => {
+      if (!getSelectedSubject()) return;
+      openAddItemDialog("assignment");
+    });
+  }
 
-  if (els.deleteSubjectBtn) {
-    els.deleteSubjectBtn.addEventListener("click", deleteSelectedSubject);
+  if (els.subjectContactsInput) {
+    els.subjectContactsInput.addEventListener("change", () => {
+      const subject = getSelectedSubject();
+      if (!subject) return;
+      subject.contacts = els.subjectContactsInput.value.trim();
+      saveState();
+      renderSubjects();
+    });
   }
 
   els.prevMonthBtn.addEventListener("click", () => {
@@ -129,7 +134,58 @@ function bindEvents() {
     els.fetchEventsBtn.addEventListener("click", fetchGoogleEvents);
   }
 
-  if (els.syncTodayBtn) {
-    els.syncTodayBtn.addEventListener("click", syncTodayScheduleToGoogle);
+  if (els.contextMenuRenameBtn) {
+    els.contextMenuRenameBtn.addEventListener("click", () => {
+      const action = contextMenuState?.onRename;
+      hideContextMenu();
+      if (typeof action === "function") {
+        action();
+      }
+    });
   }
+
+  if (els.contextMenuDeleteBtn) {
+    els.contextMenuDeleteBtn.addEventListener("click", () => {
+      const action = contextMenuState?.onDelete;
+      hideContextMenu();
+      if (typeof action === "function") {
+        action();
+      }
+    });
+  }
+
+  document.addEventListener("pointerdown", (event) => {
+    if (!els.contextActionMenu || els.contextActionMenu.hidden) return;
+    const clickedInsideMenu = event.target instanceof Node && els.contextActionMenu.contains(event.target);
+    if (!clickedInsideMenu) {
+      hideContextMenu();
+    }
+  }, true);
+
+  document.addEventListener("contextmenu", () => {
+    hideContextMenu();
+  }, true);
+
+  document.addEventListener("click", (event) => {
+    if (!els.contextActionMenu || els.contextActionMenu.hidden) return;
+    const clickedInsideMenu = event.target instanceof Node && els.contextActionMenu.contains(event.target);
+    if (!clickedInsideMenu) {
+      hideContextMenu();
+    }
+  });
+
+  document.addEventListener("scroll", () => {
+    hideContextMenu();
+  }, true);
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      hideContextMenu();
+    }
+  });
+
+  window.addEventListener("blur", () => {
+    hideContextMenu();
+  });
+
 }

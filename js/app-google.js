@@ -146,49 +146,6 @@ async function fetchGoogleEvents() {
   }
 }
 
-async function syncTodayScheduleToGoogle() {
-  if (!state.google.connected || !state.google.accessToken) {
-    alert("Connect Google Calendar first.");
-    return;
-  }
-
-  const today = isoToday();
-  const todaysSessions = state.schedule.filter((entry) => entry.date === today);
-
-  if (!todaysSessions.length) {
-    alert("No study sessions scheduled for today.");
-    return;
-  }
-
-  let successCount = 0;
-
-  for (const session of todaysSessions) {
-    const eventBody = {
-      summary: `Study: ${session.subject}`,
-      description: session.focus,
-      start: {
-        dateTime: `${session.date}T${session.startTime}:00`
-      },
-      end: {
-        dateTime: `${session.date}T${session.endTime}:00`
-      }
-    };
-
-    try {
-      await gapi.client.calendar.events.insert({
-        calendarId: state.google.calendarId || "primary",
-        resource: eventBody
-      });
-      successCount += 1;
-    } catch (error) {
-      console.error("Failed to sync session", session, error);
-    }
-  }
-
-  alert(`Synced ${successCount}/${todaysSessions.length} sessions to Google Calendar.`);
-  fetchGoogleEvents();
-}
-
 function formatGoogleEventDate(event) {
   const startValue = event.start?.dateTime || event.start?.date;
   if (!startValue) return "Unknown date";

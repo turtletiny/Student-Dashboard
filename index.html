@@ -29,18 +29,30 @@
   <body>
     <div class="texture"></div>
     <div class="app-shell">
-      <aside class="sidebar">
-        <div>
-          <p class="brand-subtitle">Tabs</p>
+      <aside class="sidebar-column">
+        <div class="sidebar">
+          <div>
+            <p class="brand-subtitle">Tabs</p>
+          </div>
+
+          <nav class="nav-list">
+            <button class="nav-btn active" data-target="dashboard">Dashboard</button>
+            <button class="nav-btn" data-target="calendar">Calendar</button>
+            <button class="nav-btn" data-target="subjects">Subjects</button>
+          </nav>
+
         </div>
 
-        <nav class="nav-list">
-          <button class="nav-btn active" data-target="dashboard">Dashboard</button>
-          <button class="nav-btn" data-target="calendar">Calendar</button>
-          <button class="nav-btn" data-target="subjects">Subjects</button>
-        </nav>
-
-        <button id="newSubjectQuickBtn" class="primary-btn full-width">+ New Subject</button>
+        <article class="sidebar-todo-card card">
+          <div class="card-header-row">
+            <div class="card-title-meta">
+              <h3>To-Do List</h3>
+              <span id="todoProgress" class="pill">0/0</span>
+            </div>
+            <button id="openTodoAddBtn" type="button" class="primary-btn plus-icon-btn" aria-label="Add To-Do"><span class="plus-icon-glyph" aria-hidden="true">+</span></button>
+          </div>
+          <ul id="todoList" class="list"></ul>
+        </article>
       </aside>
 
       <main class="main-content">
@@ -53,51 +65,55 @@
             </div>
           </div>
 
-          <div class="topbar-actions">
-            <button id="syncTodayBtn" class="primary-btn">Sync</button>
-          </div>
+          <div class="topbar-actions"></div>
         </header>
 
         <section id="dashboard" class="panel active">
-          <div class="grid-two">
-            <article class="card">
-              <div class="card-header-row">
-                <div class="card-title-meta">
-                  <h3>To-Do List</h3>
-                  <span id="todoProgress" class="pill">0/0</span>
+          <div class="dashboard-top-grid">
+            <div class="dashboard-main-column">
+              <article class="card dashboard-two-week-card">
+                <div class="card-header-row">
+                  <div class="card-title-meta">
+                    <h3>2-Week Calendar</h3>
+                    <span id="dashboardTwoWeekRange" class="pill">-</span>
+                  </div>
                 </div>
-                <button id="openTodoAddBtn" type="button" class="primary-btn card-add-btn">Add</button>
-              </div>
-              <ul id="todoList" class="list"></ul>
-            </article>
+                <div id="dashboardTwoWeekGrid" class="dashboard-two-week-grid"></div>
+              </article>
 
-            <article class="card">
+              <article class="card dashboard-upcoming-card">
+                <div class="card-header-row">
+                  <div class="card-title-meta">
+                    <h3>Upcoming Assignments</h3>
+                    <span id="upcomingAssignmentCount" class="pill">0</span>
+                  </div>
+                </div>
+                <ul id="upcomingAssignmentsList" class="assignment-deadline-grid"></ul>
+              </article>
+            </div>
+
+            <article class="card dashboard-habits-card">
               <div class="card-header-row">
                 <div class="card-title-meta">
-                  <h3>Daily Habits</h3>
-                  <span id="habitStreakSummary" class="pill">0 habits</span>
+                  <h3>Habits</h3>
+                  <span id="habitStreakSummary" class="pill">0/0</span>
                 </div>
-                <button id="openHabitAddBtn" type="button" class="primary-btn card-add-btn">Add</button>
+                <button id="openHabitAddBtn" type="button" class="primary-btn plus-icon-btn habit-add-icon-btn" aria-label="Add Habit"><span class="plus-icon-glyph" aria-hidden="true">+</span></button>
               </div>
               <ul id="habitList" class="list"></ul>
             </article>
           </div>
 
-          <div class="grid-two mt-16">
+          <div class="mt-16">
             <article class="card">
               <div class="card-header-row">
-                <h3>Study Schedule</h3>
-                <span class="pill" id="scheduleSummary">0 sessions</span>
+                <div class="card-title-meta">
+                  <h3>Subjects</h3>
+                  <span id="dashboardSubjectCount" class="pill">0</span>
+                </div>
+                <button id="openDashboardSubjectAddBtn" type="button" class="primary-btn plus-icon-btn" aria-label="Add Subject"><span class="plus-icon-glyph" aria-hidden="true">+</span></button>
               </div>
-              <form id="scheduleForm" class="schedule-form">
-                <input id="scheduleSubject" type="text" placeholder="Subject" required maxlength="80" />
-                <input id="scheduleDate" type="date" required />
-                <input id="scheduleStart" type="time" required />
-                <input id="scheduleEnd" type="time" required />
-                <input id="scheduleFocus" type="text" placeholder="Focus goal" required maxlength="140" />
-                <button type="submit" class="primary-btn">Add Session</button>
-              </form>
-              <ul id="scheduleList" class="list"></ul>
+              <ul id="dashboardSubjectCards" class="subject-cards-grid"></ul>
             </article>
           </div>
         </section>
@@ -117,38 +133,148 @@
         </section>
 
         <section id="subjects" class="panel">
-          <div class="grid-subjects">
-            <aside class="card subject-sidebar">
-              <div class="card-header-row">
-                <div class="card-title-meta">
-                  <h3>Subjects</h3>
-                  <span id="subjectCount" class="pill">0</span>
+          <article class="card subject-content">
+            <div class="card-header-row">
+              <div class="card-title-meta">
+                <h3>Subjects</h3>
+                <span id="subjectCount" class="pill">0</span>
+              </div>
+              <button id="openSubjectAddBtn" type="button" class="primary-btn plus-icon-btn" aria-label="Add Subject"><span class="plus-icon-glyph" aria-hidden="true">+</span></button>
+            </div>
+            <ul id="subjectTabs" class="subject-tabs-horizontal"></ul>
+          </article>
+        </section>
+
+        <section id="subject-page" class="panel">
+          <article class="card subject-content subject-page-shell">
+            <div class="card-header-row subject-page-header-row">
+              <button id="backToSubjectsBtn" type="button" class="ghost-btn">Back</button>
+            </div>
+
+            <header class="subject-focus-hero">
+              <h3 id="subjectTitle" class="subject-page-title">Select a Subject</h3>
+            </header>
+
+            <div class="subject-page-layout mt-16">
+              <div class="subject-page-main">
+                <div class="subject-note-row">
+                  <div class="subject-note-list-shell">
+                    <div class="subject-note-list-head">
+                      <p class="subject-note-list-col">Name</p>
+                    </div>
+                    <ul id="noteFileTabs" class="note-file-grid subject-note-file-grid"></ul>
+                  </div>
+                  <button id="openNoteFileAddBtn" type="button" class="ghost-btn subject-note-add-btn plus-icon-btn" aria-label="Add Note File"><span class="plus-icon-glyph" aria-hidden="true">+</span></button>
                 </div>
-                <button id="openSubjectAddBtn" type="button" class="primary-btn card-add-btn">Add</button>
-              </div>
-              <ul id="subjectTabs" class="list compact"></ul>
-            </aside>
 
-            <article class="card subject-content">
-              <div class="card-header-row">
-                <h3 id="subjectTitle">Select a Subject</h3>
-                <button id="deleteSubjectBtn" type="button" class="ghost-btn delete-subject-btn" disabled>
-                  Delete Subject
-                </button>
-              </div>
-              <label class="field-label" for="subjectNotes">Notes</label>
-              <textarea id="subjectNotes" rows="8" placeholder="Write notes for this subject..."></textarea>
-              <button id="saveNotesBtn" class="primary-btn">Save Notes</button>
+                <div class="notes-workspace">
+                  <section class="note-editor-card">
+                    <p id="noteBreadcrumb" class="note-breadcrumb">Archive · Current Note</p>
+                    <div class="note-toolbar" aria-hidden="true">
+                      <div class="note-toolbar-icons">
+                        <span class="material-symbols-outlined">format_bold</span>
+                        <span class="material-symbols-outlined">format_italic</span>
+                        <span class="material-symbols-outlined">format_list_bulleted</span>
+                        <span class="material-symbols-outlined">format_quote</span>
+                      </div>
+                      <p id="noteDraftSavedAt" class="note-draft-status">Draft mode</p>
+                    </div>
+                    <h4 id="noteEditorHeading" class="note-editor-heading">Current Note</h4>
+                    <label class="field-label" for="subjectNotes">Note Content</label>
+                    <textarea id="subjectNotes" rows="10" placeholder="Write notes for this subject..."></textarea>
+                    <div class="note-editor-footer">
+                      <button id="saveNotesBtn" class="primary-btn">Save Note</button>
+                      <p id="noteStatusLabel" class="item-subtext">Draft mode</p>
+                    </div>
+                  </section>
+                </div>
 
-              <h4 class="resource-header">Resources</h4>
-              <form id="resourceForm" class="resource-form">
-                <input id="resourceLabel" type="text" placeholder="Resource title" maxlength="120" />
-                <input id="resourceLink" type="url" placeholder="https://..." />
-                <button type="submit" class="ghost-btn">Add Resource</button>
-              </form>
-              <ul id="resourceList" class="list compact"></ul>
-            </article>
-          </div>
+                <section class="subject-resource-section">
+                  <div class="subject-section-header-row">
+                    <h4 class="resource-header">Resource Library</h4>
+                    <button id="openResourceAddBtn" type="button" class="ghost-btn plus-icon-btn" aria-label="Add Resource"><span class="plus-icon-glyph" aria-hidden="true">+</span></button>
+                  </div>
+                  <ul id="resourceList" class="list compact subject-resource-grid"></ul>
+                </section>
+
+                <section class="subject-assignment-section">
+                  <div class="subject-section-header-row">
+                    <h4 class="resource-header">Assignments</h4>
+                    <button id="openAssignmentAddBtn" type="button" class="ghost-btn plus-icon-btn" aria-label="Add Assignment"><span class="plus-icon-glyph" aria-hidden="true">+</span></button>
+                  </div>
+                  <ul id="subjectAssignmentList" class="list compact"></ul>
+                </section>
+              </div>
+
+              <aside class="subject-page-sidebar">
+                <article class="card subject-summary-card">
+                  <h4 class="note-context-title">Course Context</h4>
+                  <div class="note-context-item">
+                    <p class="note-context-label">Subject</p>
+                    <p id="noteContextSubject">-</p>
+                  </div>
+                  <div class="note-context-item">
+                    <p class="note-context-label">Course Code</p>
+                    <p id="subjectCourseCodeValue">-</p>
+                  </div>
+                  <div class="note-context-item">
+                    <label class="note-context-label" for="subjectContactsInput">Contacts</label>
+                    <textarea id="subjectContactsInput" rows="3" placeholder="Instructor, tutor, office hours, email..."></textarea>
+                  </div>
+                  <div class="note-context-item">
+                    <p class="note-context-label">Subject Outline</p>
+                    <p id="subjectOutlineStatus" class="item-subtext">No file uploaded</p>
+                  </div>
+                  <div class="note-context-item">
+                    <div class="card-header-row">
+                      <p class="note-context-label">Course Progress</p>
+                      <strong id="subjectCourseProgressLabel">0%</strong>
+                    </div>
+                    <div class="progress-track" aria-hidden="true">
+                      <span id="subjectCourseProgressBar" class="progress-fill"></span>
+                    </div>
+                  </div>
+                  <div class="subject-metric-grid">
+                    <div class="note-context-item">
+                      <p class="note-context-label">Assignments</p>
+                      <p id="noteContextAssignments">0 total</p>
+                    </div>
+                    <div class="note-context-item">
+                      <p class="note-context-label">Resources Linked</p>
+                      <p id="noteContextResources">0 linked</p>
+                    </div>
+                  </div>
+                </article>
+
+                <article class="card subject-summary-card">
+                  <div class="card-header-row">
+                    <h4>Assignments</h4>
+                    <span id="subjectUpcomingAssignmentsCount" class="pill">0</span>
+                  </div>
+                  <ul id="subjectUpcomingAssignmentsList" class="list compact"></ul>
+                </article>
+
+                <article class="card subject-summary-card subject-linked-stats-card">
+                  <h4 class="note-context-title">Linked Stats</h4>
+                  <div class="subject-linked-stats-grid">
+                    <div>
+                      <p id="noteLinkedCitations" class="subject-linked-stat-value">0</p>
+                      <p class="subject-linked-stat-label">Citations</p>
+                    </div>
+                    <div>
+                      <p id="noteLinkedGraphics" class="subject-linked-stat-value">0</p>
+                      <p class="subject-linked-stat-label">Graphics</p>
+                    </div>
+                  </div>
+                </article>
+
+                <article class="card subject-summary-card subject-quote-card">
+                  <p id="subjectQuoteText" class="subject-quote-text">"The pen is the tongue of the mind."</p>
+                  <p class="subject-quote-author">— CERVANTES</p>
+                </article>
+              </aside>
+            </div>
+          </article>
         </section>
       </main>
     </div>
@@ -162,12 +288,37 @@
           <input id="addItemPriority" type="checkbox" />
           <span>Mark as priority</span>
         </label>
+        <label id="addItemDueDateWrapper" class="field-label" for="addItemDueDate">Due date</label>
+        <input id="addItemDueDate" type="date" />
+        <label id="addItemDetailsWrapper" class="field-label" for="addItemDetails">Details</label>
+        <textarea id="addItemDetails" rows="3" placeholder="Optional assignment notes..."></textarea>
+        <label id="addItemFilesWrapper" class="field-label" for="addItemFiles">Files</label>
+        <input id="addItemFiles" type="file" multiple />
+        <label id="addItemLinkWrapper" class="field-label" for="addItemLink">Link</label>
+        <input id="addItemLink" type="url" placeholder="https://..." />
         <div class="settings-actions">
           <button id="cancelAddItemBtn" type="button" class="ghost-btn">Cancel</button>
           <button type="submit" class="primary-btn">Save</button>
         </div>
       </form>
     </dialog>
+
+    <dialog id="renameItemDialog">
+      <form id="renameItemForm" class="settings-form">
+        <h3 id="renameItemDialogTitle">Rename</h3>
+        <label class="field-label" for="renameItemInput">New name</label>
+        <input id="renameItemInput" type="text" maxlength="140" required />
+        <div class="settings-actions">
+          <button id="cancelRenameItemBtn" type="button" class="ghost-btn">Cancel</button>
+          <button type="submit" class="primary-btn">Save</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div id="contextActionMenu" class="context-action-menu" hidden>
+      <button id="contextMenuRenameBtn" type="button" class="context-action-btn">Rename</button>
+      <button id="contextMenuDeleteBtn" type="button" class="context-action-btn danger">Delete</button>
+    </div>
 
   </body>
 </html>

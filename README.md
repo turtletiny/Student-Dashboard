@@ -4,11 +4,12 @@ A cozy student dashboard web app inspired by a warm, bookish aesthetic.
 
 ## Features
 
-- To-do list with completion tracking
+- To-do list with completion tracking and optional due dates
 - Daily habits with streak calculation
-- Study schedule planner and calendar view
-- Subject tabs with notes and resource links
-- Google Calendar sync for fetching events and pushing today's study sessions
+- Upcoming assignments list on the dashboard
+- Calendar view based on assignment due dates
+- Subject tabs with multiple note files, resources, and subject assignments
+- Google Calendar sync for fetching events
 
 ## Run
 
