@@ -1,0 +1,10 @@
+.vercel
+config.local.js
+config.js
+config.*.js
+.env
+.env.*
+!.env.example
+!config.example.js
+config.js
+

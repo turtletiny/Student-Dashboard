@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>my personal dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,500,1,0"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://apis.google.com/js/api.js" async defer></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="config.local.js" defer></script>
+    <script src="js/app-core.js" defer></script>
+    <script src="js/app-sync.js" defer></script>
+    <script src="js/app-ui.js" defer></script>
+    <script src="js/app-google.js" defer></script>
+    <script src="js/app-events.js" defer></script>
+    <script src="js/main.js" defer></script>
+  </head>
+  <body>
+    <div class="texture"></div>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div>
+          <p class="brand-subtitle">Tabs</p>
+        </div>
+
+        <nav class="nav-list">
+          <button class="nav-btn active" data-target="dashboard">Dashboard</button>
+          <button class="nav-btn" data-target="calendar">Calendar</button>
+          <button class="nav-btn" data-target="subjects">Subjects</button>
+        </nav>
+
+        <button id="newSubjectQuickBtn" class="primary-btn full-width">+ New Subject</button>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <div class="title-row">
+            <h2>time to be great.</h2>
+            <div id="currentDateTime" class="current-date-time" aria-live="polite">
+              <p id="currentDateLine" class="current-date-time-line"></p>
+              <p id="currentTimeLine" class="current-date-time-line"></p>
+            </div>
+          </div>
+
+          <div class="topbar-actions">
+            <button id="syncTodayBtn" class="primary-btn">Sync</button>
+          </div>
+        </header>
+
+        <section id="dashboard" class="panel active">
+          <div class="grid-two">
+            <article class="card">
+              <div class="card-header-row">
+                <div class="card-title-meta">
+                  <h3>To-Do List</h3>
+                  <span id="todoProgress" class="pill">0/0</span>
+                </div>
+                <button id="openTodoAddBtn" type="button" class="primary-btn card-add-btn">Add</button>
+              </div>
+              <ul id="todoList" class="list"></ul>
+            </article>
+
+            <article class="card">
+              <div class="card-header-row">
+                <div class="card-title-meta">
+                  <h3>Daily Habits</h3>
+                  <span id="habitStreakSummary" class="pill">0 habits</span>
+                </div>
+                <button id="openHabitAddBtn" type="button" class="primary-btn card-add-btn">Add</button>
+              </div>
+              <ul id="habitList" class="list"></ul>
+            </article>
+          </div>
+
+          <div class="grid-two mt-16">
+            <article class="card">
+              <div class="card-header-row">
+                <h3>Study Schedule</h3>
+                <span class="pill" id="scheduleSummary">0 sessions</span>
+              </div>
+              <form id="scheduleForm" class="schedule-form">
+                <input id="scheduleSubject" type="text" placeholder="Subject" required maxlength="80" />
+                <input id="scheduleDate" type="date" required />
+                <input id="scheduleStart" type="time" required />
+                <input id="scheduleEnd" type="time" required />
+                <input id="scheduleFocus" type="text" placeholder="Focus goal" required maxlength="140" />
+                <button type="submit" class="primary-btn">Add Session</button>
+              </form>
+              <ul id="scheduleList" class="list"></ul>
+            </article>
+          </div>
+        </section>
+
+        <section id="calendar" class="panel">
+          <article class="card">
+            <div class="card-header-row">  
+              <h3>Study Calendar!</h3>
+              <div class="calendar-nav">
+                <button id="prevMonthBtn" class="ghost-btn" type="button">Previous</button>
+                <p id="calendarMonthLabel" class="month-label"></p>
+                <button id="nextMonthBtn" class="ghost-btn" type="button">Next</button>
+              </div>
+            </div>
+            <div id="calendarGrid" class="calendar-grid"></div>
+          </article>
+        </section>
+
+        <section id="subjects" class="panel">
+          <div class="grid-subjects">
+            <aside class="card subject-sidebar">
+              <div class="card-header-row">
+                <div class="card-title-meta">
+                  <h3>Subjects</h3>
+                  <span id="subjectCount" class="pill">0</span>
+                </div>
+                <button id="openSubjectAddBtn" type="button" class="primary-btn card-add-btn">Add</button>
+              </div>
+              <ul id="subjectTabs" class="list compact"></ul>
+            </aside>
+
+            <article class="card subject-content">
+              <div class="card-header-row">
+                <h3 id="subjectTitle">Select a Subject</h3>
+                <button id="deleteSubjectBtn" type="button" class="ghost-btn delete-subject-btn" disabled>
+                  Delete Subject
+                </button>
+              </div>
+              <label class="field-label" for="subjectNotes">Notes</label>
+              <textarea id="subjectNotes" rows="8" placeholder="Write notes for this subject..."></textarea>
+              <button id="saveNotesBtn" class="primary-btn">Save Notes</button>
+
+              <h4 class="resource-header">Resources</h4>
+              <form id="resourceForm" class="resource-form">
+                <input id="resourceLabel" type="text" placeholder="Resource title" maxlength="120" />
+                <input id="resourceLink" type="url" placeholder="https://..." />
+                <button type="submit" class="ghost-btn">Add Resource</button>
+              </form>
+              <ul id="resourceList" class="list compact"></ul>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="addItemDialog">
+      <form id="addItemForm" class="settings-form">
+        <h3 id="addItemDialogTitle">Add</h3>
+        <label class="field-label" for="addItemInput">Name</label>
+        <input id="addItemInput" type="text" maxlength="120" required />
+        <label id="addItemPriorityWrapper" class="priority-toggle" for="addItemPriority">
+          <input id="addItemPriority" type="checkbox" />
+          <span>Mark as priority</span>
+        </label>
+        <div class="settings-actions">
+          <button id="cancelAddItemBtn" type="button" class="ghost-btn">Cancel</button>
+          <button type="submit" class="primary-btn">Save</button>
+        </div>
+      </form>
+    </dialog>
+
+  </body>
+</html>
