@@ -158,13 +158,13 @@
             <div class="subject-page-layout mt-16">
               <div class="subject-page-main">
                 <div class="subject-note-row">
+                  <div class="subject-section-header-row">
+                    <h4 class="resource-header">Notes</h4>
+                    <button id="openNoteFileAddBtn" type="button" class="ghost-btn subject-note-add-btn plus-icon-btn" aria-label="Add Note File"><span class="plus-icon-glyph" aria-hidden="true">+</span></button>
+                  </div>
                   <div class="subject-note-list-shell">
-                    <div class="subject-note-list-head">
-                      <p class="subject-note-list-col">Name</p>
-                    </div>
                     <ul id="noteFileTabs" class="note-file-grid subject-note-file-grid"></ul>
                   </div>
-                  <button id="openNoteFileAddBtn" type="button" class="ghost-btn subject-note-add-btn plus-icon-btn" aria-label="Add Note File"><span class="plus-icon-glyph" aria-hidden="true">+</span></button>
                 </div>
 
                 <div class="notes-workspace">
@@ -316,6 +316,7 @@
     </dialog>
 
     <div id="contextActionMenu" class="context-action-menu" hidden>
+      <button id="contextMenuEditBtn" type="button" class="context-action-btn">Edit</button>
       <button id="contextMenuRenameBtn" type="button" class="context-action-btn">Rename</button>
       <button id="contextMenuDeleteBtn" type="button" class="context-action-btn danger">Delete</button>
     </div>

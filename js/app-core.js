@@ -135,6 +135,7 @@ const els = {
   renameItemInput: document.getElementById("renameItemInput"),
   cancelRenameItemBtn: document.getElementById("cancelRenameItemBtn"),
   contextActionMenu: document.getElementById("contextActionMenu"),
+  contextMenuEditBtn: document.getElementById("contextMenuEditBtn"),
   contextMenuRenameBtn: document.getElementById("contextMenuRenameBtn"),
   contextMenuDeleteBtn: document.getElementById("contextMenuDeleteBtn")
 };

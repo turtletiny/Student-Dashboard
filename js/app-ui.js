@@ -526,6 +526,7 @@ function renderUpcomingAssignments() {
         id: assignment.id,
         title: assignment.title,
         dueDate: assignment.dueDate,
+        subjectId: subject.id,
         subjectName: subject.name,
         details: typeof assignment.details === "string" ? assignment.details : ""
       }))
@@ -540,6 +541,20 @@ function renderUpcomingAssignments() {
   for (const item of upcoming.slice(0, 6)) {
     const li = document.createElement("li");
     li.className = "assignment-deadline-card";
+    if (item.subjectName && item.subjectId) {
+      li.tabIndex = 0;
+      li.role = "button";
+      li.setAttribute("aria-label", `Open ${item.title} in ${item.subjectName}`);
+      const openAssignment = () => {
+        openSubjectAssignment(item.subjectId, item.id);
+      };
+      li.addEventListener("click", openAssignment);
+      li.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        openAssignment();
+      });
+    }
 
     const topBar = document.createElement("span");
     topBar.className = "assignment-card-topbar";
@@ -905,7 +920,15 @@ function renderSubjects() {
         renderSubjects();
       });
 
-      attachContextMenu(button, {
+      const noteFileActions = {
+        onEdit: () => {
+          selected.selectedNoteFileId = noteFile.id;
+          saveState();
+          renderSubjects();
+          requestAnimationFrame(() => {
+            els.subjectNotes?.focus();
+          });
+        },
         onRename: () => {
           openRenameDialog({
             title: "Rename Note File",
@@ -929,9 +952,13 @@ function renderSubjects() {
           saveState();
           renderSubjects();
         }
-      });
+      };
 
-      li.append(button);
+      attachContextMenu(button, noteFileActions);
+
+      const noteFileMenuButton = createContextMenuTriggerButton(noteFileActions, `More actions for ${noteFile.title}`);
+
+      li.append(button, noteFileMenuButton);
       els.noteFileTabs.append(li);
     }
   }
@@ -1012,7 +1039,7 @@ function renderSubjects() {
   els.resourceList.innerHTML = "";
   for (const resource of selected.resources) {
     const li = document.createElement("li");
-    li.className = "list-item compact-item";
+    li.className = "list-item compact-item with-action";
 
     const link = document.createElement("a");
     link.href = resource.url;
@@ -1021,7 +1048,23 @@ function renderSubjects() {
     link.target = "_blank";
     link.rel = "noreferrer noopener";
 
-    attachContextMenu(li, {
+    const resourceActions = {
+      onEdit: () => {
+        const nextLabelInput = window.prompt("Edit resource title", resource.label);
+        if (nextLabelInput === null) return;
+        const nextLabel = nextLabelInput.trim();
+        if (!nextLabel) return;
+
+        const nextUrlInput = window.prompt("Edit resource link", resource.url || "");
+        if (nextUrlInput === null) return;
+        const nextUrl = nextUrlInput.trim();
+        if (!nextUrl) return;
+
+        resource.label = nextLabel;
+        resource.url = nextUrl;
+        saveState();
+        renderSubjects();
+      },
       onRename: () => {
         openRenameDialog({
           title: "Rename Resource",
@@ -1038,16 +1081,21 @@ function renderSubjects() {
         saveState();
         renderSubjects();
       }
-    });
+    };
 
-    li.append(link);
+    attachContextMenu(li, resourceActions);
+
+    const resourceMenuButton = createContextMenuTriggerButton(resourceActions, `More actions for ${resource.label}`);
+
+    li.append(link, resourceMenuButton);
     els.resourceList.append(li);
   }
 
   els.subjectAssignmentList.innerHTML = "";
   for (const assignment of selected.assignments || []) {
     const li = document.createElement("li");
-    li.className = "list-item";
+    li.className = "list-item with-action";
+    li.dataset.assignmentId = assignment.id;
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
@@ -1099,7 +1147,32 @@ function renderSubjects() {
       }
     }
 
-    attachContextMenu(li, {
+    const assignmentActions = {
+      onEdit: () => {
+        const nextTitleInput = window.prompt("Edit assignment title", assignment.title);
+        if (nextTitleInput === null) return;
+        const nextTitle = nextTitleInput.trim();
+        if (!nextTitle) return;
+
+        const nextDueDateInput = window.prompt("Edit due date (YYYY-MM-DD)", assignment.dueDate || "");
+        if (nextDueDateInput === null) return;
+        const nextDueDate = nextDueDateInput.trim();
+        if (!nextDueDate || !/^\d{4}-\d{2}-\d{2}$/.test(nextDueDate)) {
+          alert("Due date must use YYYY-MM-DD format.");
+          return;
+        }
+
+        const nextDetailsInput = window.prompt("Edit assignment details", assignment.details || "");
+        if (nextDetailsInput === null) return;
+
+        assignment.title = nextTitle;
+        assignment.dueDate = nextDueDate;
+        assignment.details = nextDetailsInput.trim();
+        saveState();
+        renderSubjects();
+        renderUpcomingAssignments();
+        renderCalendar();
+      },
       onRename: () => {
         openRenameDialog({
           title: "Rename Assignment",
@@ -1120,9 +1193,13 @@ function renderSubjects() {
         renderUpcomingAssignments();
         renderCalendar();
       }
-    });
+    };
 
-    li.append(checkbox, textWrap);
+    attachContextMenu(li, assignmentActions);
+
+    const assignmentMenuButton = createContextMenuTriggerButton(assignmentActions, `More actions for ${assignment.title}`);
+
+    li.append(checkbox, textWrap, assignmentMenuButton);
     els.subjectAssignmentList.append(li);
   }
 
@@ -1266,6 +1343,23 @@ function pickSubjectHue(name) {
   return hash;
 }
 
+function openSubjectAssignment(subjectId, assignmentId) {
+  const subject = state.subjects.find((entry) => entry.id === subjectId);
+  if (!subject) return;
+
+  state.selectedSubjectId = subjectId;
+  saveState();
+  renderSubjects();
+  switchPanel("subject-page");
+
+  requestAnimationFrame(() => {
+    const assignmentItem = document.querySelector(`[data-assignment-id="${assignmentId}"]`);
+    const scrollTarget = assignmentItem || els.subjectAssignmentList;
+    if (!scrollTarget) return;
+    scrollTarget.scrollIntoView({ behavior: "smooth", block: "center" });
+  });
+}
+
 function formatIsoDate(isoDate) {
   if (!isoDate) return "No date";
   const parsed = new Date(`${isoDate}T00:00:00`);
@@ -1361,6 +1455,36 @@ function toggleHabitForToday(habitId, isChecked) {
   renderHabits();
 }
 
+function createContextMenuTriggerButton(actions, label) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "item-menu-btn";
+  button.setAttribute("aria-label", label || "More actions");
+
+  const icon = document.createElement("span");
+  icon.className = "material-symbols-outlined";
+  icon.setAttribute("aria-hidden", "true");
+  icon.textContent = "more_vert";
+  button.append(icon);
+
+  button.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    hideContextMenu();
+    const rect = button.getBoundingClientRect();
+    showContextMenu(rect.right, rect.bottom, actions);
+  });
+
+  button.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    hideContextMenu();
+    showContextMenu(event.clientX, event.clientY, actions);
+  });
+
+  return button;
+}
+
 function attachContextMenu(targetElement, actions) {
   targetElement.addEventListener("contextmenu", (event) => {
     event.preventDefault();
@@ -1371,15 +1495,17 @@ function attachContextMenu(targetElement, actions) {
 }
 
 function showContextMenu(x, y, actions) {
-  if (!els.contextActionMenu || !els.contextMenuRenameBtn || !els.contextMenuDeleteBtn) return;
+  if (!els.contextActionMenu || !els.contextMenuRenameBtn || !els.contextMenuDeleteBtn || !els.contextMenuEditBtn) return;
+  const hasEdit = typeof actions?.onEdit === "function";
   const hasRename = typeof actions?.onRename === "function";
   const hasDelete = typeof actions?.onDelete === "function";
-  if (!hasRename && !hasDelete) {
+  if (!hasEdit && !hasRename && !hasDelete) {
     hideContextMenu();
     return;
   }
 
   contextMenuState = actions;
+  els.contextMenuEditBtn.hidden = !hasEdit;
   els.contextMenuRenameBtn.hidden = !hasRename;
   els.contextMenuDeleteBtn.hidden = !hasDelete;
 

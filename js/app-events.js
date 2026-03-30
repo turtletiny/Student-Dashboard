@@ -144,6 +144,16 @@ function bindEvents() {
     });
   }
 
+  if (els.contextMenuEditBtn) {
+    els.contextMenuEditBtn.addEventListener("click", () => {
+      const action = contextMenuState?.onEdit;
+      hideContextMenu();
+      if (typeof action === "function") {
+        action();
+      }
+    });
+  }
+
   if (els.contextMenuDeleteBtn) {
     els.contextMenuDeleteBtn.addEventListener("click", () => {
       const action = contextMenuState?.onDelete;
